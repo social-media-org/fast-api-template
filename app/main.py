@@ -32,15 +32,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Startup
     logger.info("Starting application", extra={"environment": settings.environment})
 
-    global mongo_client
     try:
-        mongo_client = AsyncIOMotorClient(
+        database.mongo_client = AsyncIOMotorClient(
             settings.mongodb_url,
             minPoolSize=settings.mongodb_min_pool_size,
             maxPoolSize=settings.mongodb_max_pool_size,
         )
         # Test connection
-        await mongo_client.admin.command("ping")
+        await database.mongo_client.admin.command("ping")
         logger.info("MongoDB connected successfully")
     except Exception as e:
         logger.error(f"Failed to connect to MongoDB: {e}")
@@ -50,8 +49,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Shutdown
     logger.info("Shutting down application")
-    if mongo_client:
-        mongo_client.close()
+    if database.mongo_client:
+        database.mongo_client.close()
         logger.info("MongoDB connection closed")
 
 
