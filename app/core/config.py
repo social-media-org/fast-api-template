@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     allowed_hosts: list[str] = ["*"]
 
     # MongoDB
-    mongodb_url: str
+    mongodb_url: str = "mongodb://localhost:27017"
     mongodb_database: str = "fastapi_db"
     mongodb_min_pool_size: int = 10
     mongodb_max_pool_size: int = 100
