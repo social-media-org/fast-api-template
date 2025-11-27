@@ -20,7 +20,6 @@ def setup_logging() -> None:
     if settings.log_format == "json":
         # Enable JSON logging
         json_logging.init_fastapi(enable_json=True)
-        json_logging.init_request_instrument(app=None)
 
         # Configure root logger
         logger = logging.getLogger()
