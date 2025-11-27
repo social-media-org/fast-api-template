@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.main import get_database
+from app.core.database import get_database
 from app.repositories.example_repository import ExampleRepository
 from app.services.example_service import ExampleService
 
