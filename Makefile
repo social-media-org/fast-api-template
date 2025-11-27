@@ -1,10 +1,17 @@
-.PHONY: help install run run-docker stop test format lint type-check clean
+.PHONY: help install run run-docker stop test type-check clean
 
 # Variables
 PYTHON := python3
 PIP := $(PYTHON) -m pip
 UVICORN := uvicorn
 APP_MODULE := app.main:app
+APP_PORT := 8000
+
+# Load .env file if it exists
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
 # Default target
 .DEFAULT_GOAL := help
@@ -20,7 +27,7 @@ install: ## Install dependencies
 	$(PIP) install -r requirements.txt
 
 run: ## Run the application locally
-	$(UVICORN) $(APP_MODULE) --reload --host 0.0.0.0 --port 8000
+	$(UVICORN) $(APP_MODULE) --reload --host 0.0.0.0 --port $(APP_PORT)
 
 run-docker: ## Run the application with Docker Compose
 	docker-compose up --build
@@ -29,19 +36,10 @@ stop: ## Stop Docker containers
 	docker-compose down
 
 test: ## Run tests (placeholder)
-	@echo "Tests not implemented yet. Add pytest to requirements.txt and create tests."
+	@echo "Tests not implemented yet. Add pytest to requirements.txt and create tests/"
 	# pytest tests/ -v
 
-format: ## Format code with ruff
-	$(PIP) install ruff
-	ruff format app/
-
-lint: ## Lint code with ruff
-	$(PIP) install ruff
-	ruff check app/
-
 type-check: ## Type check with mypy
-	$(PIP) install mypy
 	mypy app/
 
 clean: ## Clean cache and temporary files
