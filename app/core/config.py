@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # API
     api_v1_prefix: str = "/api/v1"
     allowed_hosts: list[str] = ["*"]
+    app_port: int = 8000
 
     # MongoDB
     mongodb_url: str = "mongodb://localhost:27017"
