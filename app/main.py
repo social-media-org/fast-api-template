@@ -100,17 +100,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-
-def get_database() -> AsyncIOMotorClient:
-    """Get MongoDB database instance.
-
-    Returns:
-        AsyncIOMotorClient: MongoDB database instance
-
-    Raises:
-        RuntimeError: If database is not initialized
-    """
-    if mongo_client is None:
-        raise RuntimeError("Database not initialized")
-    return mongo_client[settings.mongodb_database]
