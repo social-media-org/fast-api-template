@@ -2,20 +2,6 @@
 
 Template de projet FastAPI prêt à l'emploi suivant les principes de **Clean Architecture** et **SOLID**.
 
-## 📋 Table des Matières
-
-- [Caractéristiques](#caractéristiques)
-- [Architecture](#architecture)
-- [Technologies](#technologies)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Utilisation](#utilisation)
-- [API Endpoints](#api-endpoints)
-- [Développement](#développement)
-- [Docker](#docker)
-- [Tests](#tests)
-- [Principes SOLID](#principes-solid)
-
 ## ✨ Caractéristiques
 
 - ✅ **Clean Architecture** avec séparation claire des responsabilités
@@ -27,7 +13,7 @@ Template de projet FastAPI prêt à l'emploi suivant les principes de **Clean Ar
 - ✅ **Gestion d'erreurs** centralisée et personnalisée
 - ✅ **Docker multi-stage** optimisé pour production
 - ✅ **Hot reload** pour développement
-- ✅ **Makefile** pour commandes courantes
+- ✅ **Port paramétrable** via variable d'environnement
 - ✅ **API versioning** (v1)
 - ✅ **Health check** endpoint
 
@@ -37,11 +23,11 @@ Template de projet FastAPI prêt à l'emploi suivant les principes de **Clean Ar
 app/
 ├── api/                    # API Layer - Points d'entrée HTTP
 │   ├── dependencies/       # Injection de dépendances
-│   └── v1/                 # API Version 1
-│       ├── routers/        # Regroupement des endpoints
-│       └── endpoints/      # Endpoints individuels
+│   └── v1/
+│       └── routes/         # Endpoints API
 ├── core/                   # Core Layer - Configuration et utilitaires
 │   ├── config.py           # ConfigService (Settings)
+│   ├── database.py         # Database service (Motor)
 │   ├── logging.py          # Configuration logging
 │   └── exceptions.py       # Exceptions personnalisées
 ├── services/               # Service Layer - Logique métier
@@ -56,19 +42,19 @@ app/
 ### Flux de données
 
 ```
-Request → Endpoint → Service → Repository → MongoDB
-                ↓        ↓         ↓
-             Pydantic  Business  Data Access
-             Models    Logic     Layer
+Request → Route → Service → Repository → MongoDB
+             ↓       ↓         ↓
+          Pydantic Business  Data Access
+          Models   Logic     Layer
 ```
 
 ## 🛠️ Technologies
 
-- **Python 3.13** (dernière version)
+- **Python 3.13** (dernière version stable)
 - **FastAPI** - Framework web moderne
 - **Uvicorn** - Serveur ASGI
 - **Motor** - MongoDB async driver
-- **Pydantic** - Validation de données
+- **Pydantic v2** - Validation de données
 - **mypy** - Type checking
 - **Docker** - Containerisation
 
@@ -76,7 +62,7 @@ Request → Endpoint → Service → Repository → MongoDB
 
 ### Prérequis
 
-- Python 3.11+
+- Python 3.13+
 - pip
 - (Optionnel) Docker & Docker Compose
 
@@ -113,10 +99,29 @@ cp .env.example .env
 nano .env
 ```
 
-**Minimum requis dans .env:**
+**Configuration dans .env:**
+
 ```env
+# Application
+APP_NAME="FastAPI Clean Architecture"
+APP_VERSION="1.0.0"
+DEBUG=false
+ENVIRONMENT=development
+
+# API
+API_V1_PREFIX=/api/v1
+ALLOWED_HOSTS=["*"]
+APP_PORT=8000
+
+# MongoDB Atlas
 MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/
 MONGODB_DATABASE=fastapi_db
+MONGODB_MIN_POOL_SIZE=10
+MONGODB_MAX_POOL_SIZE=100
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FORMAT=json
 ```
 
 ## 🚀 Utilisation
@@ -124,14 +129,14 @@ MONGODB_DATABASE=fastapi_db
 ### Démarrage local
 
 ```bash
-# Avec Makefile
+# Avec Makefile (utilise APP_PORT du .env)
 make run
 
 # OU directement avec uvicorn
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-L'API sera disponible sur: **http://localhost:8000**
+L'API sera disponible sur: **http://localhost:8000** (ou le port configuré dans .env)
 
 ### Documentation interactive
 
@@ -202,9 +207,9 @@ DELETE /api/v1/examples/{id}
 ```bash
 make help          # Afficher l'aide
 make install       # Installer les dépendances
-make run           # Lancer l'application
-make format        # Formatter le code (ruff)
-make lint          # Linter le code (ruff)
+make run           # Lancer l'application (utilise APP_PORT)
+make run-docker    # Lancer avec Docker Compose
+make stop          # Stopper les containers
 make type-check    # Vérification des types (mypy)
 make clean         # Nettoyer les caches
 make dev           # Setup environnement dev
@@ -219,16 +224,6 @@ mypy app/
 ```
 
 Configuration mypy dans `mypy.ini` (mode modéré, pas trop strict).
-
-### Formatting & Linting
-
-```bash
-# Format code
-make format
-
-# Check linting
-make lint
-```
 
 ## 🐳 Docker
 
@@ -246,18 +241,32 @@ make stop
 docker-compose down
 ```
 
+### Variables d'environnement Docker
+
+Le port est configurable via `APP_PORT` dans le fichier `.env`. Docker Compose et le Dockerfile utilisent automatiquement cette variable.
+
+```bash
+# Dans .env
+APP_PORT=8080  # Changez le port ici
+
+# Docker utilisera automatiquement ce port
+docker-compose up
+```
+
 ### Build image seule
 
 ```bash
-docker build -t fastapi-clean-arch .
+docker build -t fastapi-clean-arch --build-arg APP_PORT=8000 .
 docker run -p 8000:8000 --env-file .env fastapi-clean-arch
 ```
 
 ### Dockerfile Multi-stage
 
 Le Dockerfile utilise un build multi-stage pour optimiser la taille de l'image:
-- **Stage 1 (builder)**: Installation des dépendances
+- **Stage 1 (builder)**: Installation des dépendances dans un virtualenv
 - **Stage 2 (runtime)**: Image légère avec uniquement le nécessaire
+- Utilisateur non-root pour la sécurité
+- Health check intégré
 
 ## 🧪 Tests
 
@@ -286,7 +295,7 @@ pytest tests/ -v
 Chaque classe/module a **une seule responsabilité**:
 - `ExampleRepository` → Accès données uniquement
 - `ExampleService` → Logique métier uniquement
-- `ExampleEndpoint` → Gestion HTTP uniquement
+- `example.py` (routes) → Gestion HTTP uniquement
 
 ### Open/Closed Principle (OCP)
 Le code est **ouvert à l'extension**, **fermé à la modification**:
@@ -332,12 +341,12 @@ git commit -m "Initial commit from template"
 - Ajouter vos models dans `app/models/`
 - Créer vos repositories dans `app/repositories/`
 - Implémenter vos services dans `app/services/`
-- Créer vos endpoints dans `app/api/v1/endpoints/`
+- Créer vos routes dans `app/api/v1/routes/`
 
 4. **Configuration**
 ```bash
 cp .env.example .env
-# Éditer .env avec vos valeurs
+# Éditer .env avec vos valeurs (notamment MONGODB_URL et APP_PORT)
 ```
 
 5. **Lancer**
@@ -346,9 +355,19 @@ make install
 make run
 ```
 
-## 🤝 Contribution
+## 🔧 Personnalisation du port
 
-Ce template est conçu pour être un point de départ solide. N'hésitez pas à l'adapter à vos besoins spécifiques!
+Le port est **entièrement paramétrable** depuis un seul endroit (`.env`):
+
+```env
+APP_PORT=8080  # Changez ici
+```
+
+Cette variable est automatiquement utilisée par:
+- ✅ `make run` (Makefile)
+- ✅ `docker-compose.yml`
+- ✅ `Dockerfile`
+- ✅ Health check
 
 ## 📄 License
 
