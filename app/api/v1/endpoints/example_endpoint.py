@@ -67,9 +67,9 @@ async def get_example(
     description="Retrieve a paginated list of all examples.",
 )
 async def list_examples(
+    service: Annotated[ExampleService, Depends(get_example_service)],
     skip: Annotated[int, Query(ge=0, description="Number of records to skip")] = 0,
     limit: Annotated[int, Query(ge=1, le=100, description="Maximum number of records")] = 100,
-    service: Annotated[ExampleService, Depends(get_example_service)],
 ) -> List[ExampleResponse]:
     """List all examples with pagination.
 
