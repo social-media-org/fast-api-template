@@ -21,37 +21,16 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Application lifespan manager for startup and shutdown events.
-
-    Args:
-        app: FastAPI application instance
-
-    Yields:
-        None
-    """
     # Startup
-    logger.info("Starting application", extra={"environment": settings.environment})
-
-    try:
-        database.mongo_client = AsyncIOMotorClient(
-            settings.mongodb_url,
-            minPoolSize=settings.mongodb_min_pool_size,
-            maxPoolSize=settings.mongodb_max_pool_size,
-        )
-        # Test connection
-        await database.mongo_client.admin.command("ping")
-        logger.info("MongoDB connected successfully")
-    except Exception as e:
-        logger.error(f"Failed to connect to MongoDB: {e}")
-        raise
+    await database.connect_to_mongo()
+    print("✅ Connected to MongoDB Atlas")
 
     yield
 
     # Shutdown
     logger.info("Shutting down application")
-    if database.mongo_client:
-        database.mongo_client.close()
-        logger.info("MongoDB connection closed")
+    await database.close_mongo_connection()
+    print("❌ Disconnected from MongoDB Atlas")
 
 
 def create_app() -> FastAPI:

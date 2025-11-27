@@ -29,13 +29,13 @@ class Settings(BaseSettings):
 
     # MongoDB
     mongodb_url: str = "mongodb://localhost:27017"
-    mongodb_database: str = "fastapi_db"
+    DB_NAME: str = "fastapi_db"
     mongodb_min_pool_size: int = 10
     mongodb_max_pool_size: int = 100
 
     # Logging
     log_level: str = "INFO"
-    log_format: str = "json"  # json or text
+    log_format: str = "text"  # json or text
 
 
 @lru_cache

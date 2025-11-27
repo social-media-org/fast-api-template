@@ -86,7 +86,7 @@ APP_PORT=8000
 
 # MongoDB Atlas (IMPORTANT: remplacer par votre connection string)
 MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/
-MONGODB_DATABASE=fastapi_db
+DB_NAME=fastapi_db
 ```
 
 ## 🎯 Utilisation

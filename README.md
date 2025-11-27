@@ -115,7 +115,7 @@ APP_PORT=8000
 
 # MongoDB Atlas
 MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/
-MONGODB_DATABASE=fastapi_db
+DB_NAME=fastapi_db
 MONGODB_MIN_POOL_SIZE=10
 MONGODB_MAX_POOL_SIZE=100
 

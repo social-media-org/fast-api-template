@@ -56,7 +56,7 @@ nano .env
 ```env
 APP_PORT=8000
 MONGODB_URL=mongodb+srv://user:password@cluster.mongodb.net/
-MONGODB_DATABASE=fastapi_db
+DB_NAME=fastapi_db
 ```
 
 ### 5. Lancer l'application
