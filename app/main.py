@@ -10,15 +10,13 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.api.v1.routers import example_router
 from app.core.config import settings
+from app.core import database
 from app.core.exceptions import setup_exception_handlers
 from app.core.logging import get_logger, setup_logging
 
 # Setup logging
 setup_logging()
 logger = get_logger(__name__)
-
-# MongoDB client (will be initialized in lifespan)
-mongo_client: AsyncIOMotorClient | None = None
 
 
 @asynccontextmanager
